@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="FakeplayerEx:jar">
+    <output-path>$PROJECT_DIR$/../YW5lite_Sev_Test/plugins</output-path>
+    <root id="archive" name="FakeplayerEx.jar">
+      <element id="module-output" name="FakeplayerEx" />
+    </root>
+  </artifact>
+</component>
