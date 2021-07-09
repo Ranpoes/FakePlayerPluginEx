@@ -42,7 +42,7 @@ public class Clocking extends Thread{
             int h = new GregorianCalendar().get(Calendar.HOUR_OF_DAY);
             int m = new GregorianCalendar().get(Calendar.MINUTE);
             this.clock = h * 2 + ( m>=30 ? 1 : 0);
-            logger.log(Level.INFO, TITLE+ChatColor.BLUE+"启动的时间刻："+ChatColor.YELLOW);
+            logger.log(Level.INFO, TITLE+ChatColor.BLUE+"启动的时间刻："+ChatColor.YELLOW+this.clock);
         }catch(Exception e){
             logger.log(Level.SEVERE, TITLE+ChatColor.RED+"FakePlayerEx主线程启动失败！");
             logger.log(Level.SEVERE, ChatColor.RED+e.toString());
