@@ -1,6 +1,5 @@
 package ranpoes.fakeplayerex.thread;
 
-import org.bukkit.ChatColor;
 import ranpoes.fakeplayerex.FakePlayerEx;
 import ranpoes.fakeplayerex.file.ChatDataFile;
 import ranpoes.fakeplayerex.function.FakePlayerAct;
@@ -107,7 +106,7 @@ public class Chating extends Thread{
                 for(String[] i: context){
                     //模拟打字延迟
                     try{
-                        Thread.sleep(i[1].length()*1000+(int) (Math.random()*(6)-3)*1000);
+                        Thread.sleep(i[1].length()*3000+(int) (Math.random()*(6)-3)*1000);
                         //Thread.sleep(100);
                     }catch( Exception e){
                         return;
@@ -116,6 +115,9 @@ public class Chating extends Thread{
                     if(playerNamesJoin.contains(IDS.get(i[0]))){
                         fakePlayerAct.fakePlayerChat(IDS.get(i[0]),i[1]);
                         logger.log(Level.INFO, IDS.get(i[0])+" : "+i[1]);
+                    }else{
+                        //直接掐掉会话，不然可能会出现独角戏的情况
+                        break;
                     }
                 }
             }
