@@ -11,16 +11,15 @@ import java.util.Queue;
 
 public class Event implements Listener {
 
-    private FakePlayerEx plugin;
-    private PlayerNameFile playerNameFile;
-    private Queue<String> fakeplayers;
+    private final FakePlayerEx plugin;
+    private final PlayerNameFile playerNameFile;
+    private final String[] fakeplayers;
 
     public Event(FakePlayerEx plugin){
         this.plugin = plugin;
         this.playerNameFile = new PlayerNameFile(plugin);
-        this.fakeplayers = playerNameFile.getPlayers();
+        this.fakeplayers = playerNameFile.getPlayers().toArray(new String[0]);
     }
-
 
     /**
      * 玩家指令拦截器
@@ -34,14 +33,17 @@ public class Event implements Listener {
             return;
         }
         try{
-            if(arr[0].equals("tpa")||
-               arr[0].equals("tp")||
-               arr[0].equals("m")||
-               arr[0].equals("message")) {
+            if(arr[0].equals("/tpa")||
+               arr[0].equals("/tp")||
+               arr[0].equals("/m")||
+               arr[0].equals("/message")) {
                 //如果命令指向假玩家
-                if(fakeplayers.contains(arr[1])){
-                    event.setCancelled(true);
-                    event.getPlayer().sendMessage(ChatColor.RED+"目标玩家屏蔽了所有的新人消息");
+                for(String i : fakeplayers){
+                    if(i.contains(arr[1])){
+                        event.setCancelled(true);
+                        event.getPlayer().sendMessage(ChatColor.RED+"目标玩家屏蔽了所有新人的消息");
+                        break;
+                    }
                 }
             }
         }catch(Exception e){

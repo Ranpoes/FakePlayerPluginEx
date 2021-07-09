@@ -107,8 +107,8 @@ public class Chating extends Thread{
                 for(String[] i: context){
                     //模拟打字延迟
                     try{
-                        //Thread.sleep(i[1].length()*1000+(int) (Math.random()*(6)-3)*1000);
-                        Thread.sleep(100);
+                        Thread.sleep(i[1].length()*1000+(int) (Math.random()*(6)-3)*1000);
+                        //Thread.sleep(100);
                     }catch( Exception e){
                         return;
                     }
@@ -121,8 +121,8 @@ public class Chating extends Thread{
             }
             //睡眠计时,时长为两个聊天会话的间隔，建议10min到15min
             try{
-                //Thread.sleep((int) (Math.random()*(5)+10)*60000);
-                Thread.sleep(1000);
+                Thread.sleep((int) (Math.random()*(5)+10)*60000);
+                //Thread.sleep(1000);
             }catch( Exception e){
                 return;
             }

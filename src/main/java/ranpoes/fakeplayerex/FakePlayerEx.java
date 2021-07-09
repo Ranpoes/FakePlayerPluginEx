@@ -5,8 +5,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import ranpoes.fakeplayerex.event.Event;
 import ranpoes.fakeplayerex.thread.Clocking;
 
-import java.util.Date;
-
 public class FakePlayerEx extends JavaPlugin {
 
     @Override

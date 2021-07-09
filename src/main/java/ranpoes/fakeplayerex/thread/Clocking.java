@@ -80,7 +80,7 @@ public class Clocking extends Thread{
                 //睡眠计时,时长为一刻度
                 try{
                     //Thread.sleep(30*60000);
-                    Thread.sleep(30*600);
+                    Thread.sleep(30*60000);
                 }catch( Exception e){
                     return;
                 }
