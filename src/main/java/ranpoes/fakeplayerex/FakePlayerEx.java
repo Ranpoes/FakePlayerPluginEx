@@ -6,11 +6,12 @@ import ranpoes.fakeplayerex.event.Event;
 import ranpoes.fakeplayerex.thread.Clocking;
 
 public class FakePlayerEx extends JavaPlugin {
+    private Clocking clock;
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        Clocking clock = new Clocking(this);
+        this.clock = new Clocking(this);
         clock.start();
         Bukkit.getPluginManager().registerEvents(new Event(this), this);
         getLogger().info("FakePlayerEx已启动");
@@ -20,6 +21,7 @@ public class FakePlayerEx extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        this.clock.close();
         getLogger().info("FakePlayerEx已关闭");
     }
 

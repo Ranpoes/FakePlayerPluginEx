@@ -27,10 +27,9 @@ public class Clocking extends Thread{
     private final Logger logger = Bukkit.getLogger();
     private int clock;
     private static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
+    //异步模拟玩家聊天线程,需能够在插件onDisable时维护
+    private Chating threadChating;
 
-    /**
-     *
-     */
     public Clocking(FakePlayerEx plugin){
         //等待服务端启动完毕,删除fakeplayer的保存假玩家文件,初始化开始时间刻
         try{
@@ -51,6 +50,13 @@ public class Clocking extends Thread{
         this.timePlayerNums = new PlanFile(plugin, clock).getTimePlayerNums();
         this.playerNamesJoin = new LinkedList<>();
         this.playerNamesLeave = new PlayerNameFile(plugin).getPlayers();
+        //启动异步模拟玩家聊天线程
+        this.threadChating = new Chating(plugin, playerNamesJoin, logger);
+        threadChating.start();
+    }
+
+    public void close(){
+        this.threadChating.close();
     }
 
     public void run(){
@@ -60,9 +66,6 @@ public class Clocking extends Thread{
         //外循环为一天日期变更，重置玩家人数计划队列
         while(true){
             timePlayerNumsTmp = new LinkedList<>(timePlayerNums);
-            //异步模拟玩家聊天线程
-            Chating threadChating = new Chating(plugin, playerNamesJoin, logger);
-            threadChating.start();
             //内循环为24小时的时刻推演，半小时为一刻
             while(clock!=48){
                 //获取期望的玩家数量
@@ -80,14 +83,13 @@ public class Clocking extends Thread{
                 //睡眠计时,时长为一刻度
                 try{
                     //Thread.sleep(30*60000);
-                    Thread.sleep(30*60000);
+                    Thread.sleep(30*600);
                 }catch( Exception e){
                     return;
                 }
                 //规划时间刻推进
                 clock+=1;
             }
-            threadChating.interrupt();
             clock = 0;
         }
 

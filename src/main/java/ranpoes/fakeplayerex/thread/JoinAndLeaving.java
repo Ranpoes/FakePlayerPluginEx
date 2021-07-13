@@ -52,7 +52,7 @@ public class JoinAndLeaving extends Thread{
                     playerNamesJoin.add(name);
                     fakePlayerAct.fakePlayerJoin(name);
                     try {
-                        Thread.sleep(avgWait * 60000);
+                        Thread.sleep(avgWait * 600);
                     } catch (Exception e) {
                         return;
                     }
@@ -64,7 +64,7 @@ public class JoinAndLeaving extends Thread{
                     playerNamesLeave.add(name);
                     fakePlayerAct.fakePlayerLeave(name);
                     try {
-                        Thread.sleep(avgWait * 60000);
+                        Thread.sleep(avgWait * 600);
                     } catch (Exception e) {
                         return;
                     }

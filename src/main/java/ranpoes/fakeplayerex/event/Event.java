@@ -36,7 +36,8 @@ public class Event implements Listener {
             if(arr[0].equals("/tpa")||
                arr[0].equals("/tp")||
                arr[0].equals("/m")||
-               arr[0].equals("/message")) {
+               arr[0].equals("/message")||
+               arr[0].equals("/tell")) {
                 //如果命令指向假玩家
                 for(String i : fakeplayers){
                     if(i.contains(arr[1])){
