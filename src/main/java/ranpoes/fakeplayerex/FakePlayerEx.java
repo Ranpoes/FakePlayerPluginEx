@@ -6,6 +6,7 @@ import ranpoes.fakeplayerex.event.Event;
 import ranpoes.fakeplayerex.thread.Clocking;
 
 public class FakePlayerEx extends JavaPlugin {
+    public static FakePlayerEx plugin;
     private Clocking clock;
 
     @Override
@@ -25,5 +26,8 @@ public class FakePlayerEx extends JavaPlugin {
         getLogger().info("FakePlayerEx已关闭");
     }
 
+    public static FakePlayerEx getPlugin() {
+        return plugin;
+    }
 
 }

@@ -95,6 +95,7 @@ public class Chating extends Thread{
         chatDataFile.writeBack(plugin);
     }
 
+
     public void run(){
         fakePlayerAct.fakePlayerReload();
         while(true){
@@ -107,6 +108,7 @@ public class Chating extends Thread{
                     while((IDS = matchID(context)) == null){
                         context = chatDataFile.findContext(3,8);
                     }
+                    chatDataFile.synDelete();
                     logger.log(Level.INFO, ChatColor.GOLD+"成功获取了一段聊天，总长："+ChatColor.RED+context.size());
                     logger.log(Level.INFO, ChatColor.GOLD+"剩余文本容量："+ChatColor.RED+chatDataFile.getChatsPlayerText().size());
                     //聊天逻辑在这里实现

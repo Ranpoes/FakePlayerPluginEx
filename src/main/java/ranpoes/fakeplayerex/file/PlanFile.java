@@ -32,17 +32,13 @@ public class PlanFile {
         try{
             String configPath = plugin.getConfig().getString("plan_path");
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(configPath)));
-            String data;
             //调整时间队列首为n时刻，实现为n刻分割两个Array，从后者开始入队，再前者
             ArrayList<String> a1 = new ArrayList<>();
-            ArrayList<String> a2 = new ArrayList<>();
             for(int step=0;step<n;step+=1){
                 a1.add(br.readLine());
             }
             for(int step=n;step<48;step+=1){
-                data = br.readLine();
-                a2.add(data);
-                this.timePlayerNums.add(Integer.parseInt(data));
+                this.timePlayerNums.add(Integer.parseInt(br.readLine()));
             }
             for(String playerNum : a1){
                 this.timePlayerNums.add(Integer.parseInt(playerNum));

@@ -62,18 +62,19 @@ public class Clocking extends Thread{
     public void run(){
         int playerJoinNums = 0;  //维护当前时刻假玩家人数
         int num;                 //队列取得计划玩家数量的临时变量
+        int clock_start = clock;
         Queue<Integer> timePlayerNumsTmp;
         //外循环为一天日期变更，重置玩家人数计划队列
         while(true){
             timePlayerNumsTmp = new LinkedList<>(timePlayerNums);
-            //内循环为24小时的时刻推演，半小时为一刻
-            while(clock!=48){
+            //内循环为自启动插件时刻开始的24小时推演，半小时为一刻
+            while(clock-clock_start!=48){
                 //获取期望的玩家数量
                 num = timePlayerNumsTmp.poll();
                 if(clock%2 == 0)
-                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+clock/2+ChatColor.BLUE+" 点，期望的玩家数量: "+ChatColor.YELLOW+num);
+                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点，期望的玩家数量: "+ChatColor.YELLOW+num);
                 else
-                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+clock/2+ChatColor.BLUE+" 点半，期望的玩家数量: "+ChatColor.YELLOW+num);
+                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点半，期望的玩家数量: "+ChatColor.YELLOW+num);
                 //异步模拟玩家陆续登录、离线线程。与计划的人数差和现有在线离线名单交由其处理
                 JoinAndLeaving threadJoinLeaving = new JoinAndLeaving(plugin,playerJoinNums - num, playerNamesJoin, playerNamesLeave);
                 threadJoinLeaving.start();
@@ -90,7 +91,7 @@ public class Clocking extends Thread{
                 //规划时间刻推进
                 clock+=1;
             }
-            clock = 0;
+            clock = clock_start;
         }
 
     }

@@ -17,6 +17,9 @@ public class ChatDataFile {
     private static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
     //整个插件运行的生命周期内都会被维护的，未被使用语料库，在插件运行结束后会写回文件
     private ArrayList<String[]> chatsPlayerText = new ArrayList<>();
+    //回调时同步删除语料内容，保存起始结束下标
+    int context_start;
+    int context_end;
 
     public ChatDataFile(FakePlayerEx plugin, Logger logger){
         this.plugin = plugin;
@@ -81,19 +84,18 @@ public class ChatDataFile {
      * 随机获取聊天上下文函数
      * 维护两份语料库，其中一份为备份，另一份不断提取语句并原地删除，直至容量不足再拿备份重置
      * 这样可以避免一轮启动周期内可能的复读现象
+     * 删除使用过的语料需要回调，因为这里产生的文本不一定能够在聊天线程中匹配到id，而可能直接被弃用
      */
     public ArrayList<String[]> findContext(int takeWideMin, int takeWideMax){
         int chatLinesMax = chatsPlayerText.size();
         int ran1 = (int) (Math.random()*(chatLinesMax));
         int ran2 = (int) (Math.random()*(takeWideMax-takeWideMin)+takeWideMin);
         ArrayList<String[]> list = new ArrayList<>();
-        try {
-            for (int i = (ran1 - ran2<0 ? 0 : ran1-ran2); i < (ran1 + ran2>=chatLinesMax? chatLinesMax:ran1+ran2); i++) {
-                list.add(chatsPlayerText.get(i));
-                chatsPlayerText.remove(i);
-            }
-        }catch(Exception e){
-            return findContext(takeWideMin, takeWideMax);
+        //每次匹配文本都会更新起始终止下标，只有匹配成功时的回调synDelete才会用其进行语料删除
+        context_start = Math.max(0,ran1-ran2);
+        context_end = Math.min(chatLinesMax-1,ran1+ran2);
+        for (int i = context_start; i < context_end; i++) {
+            list.add(chatsPlayerText.get(i));
         }
         if(chatLinesMax<50){
             chatsPlayerText = new ArrayList<>(readChatBack(plugin));
@@ -102,6 +104,14 @@ public class ChatDataFile {
         return list;
     }
 
+    /**
+     * 同步删除语料
+     */
+    public void synDelete(){
+        for (int i = context_start; i < context_end; i++) {
+            chatsPlayerText.remove(context_start);
+        }
+    }
 
     /**
      * 插件关闭时将未使用的语料写回文件，以备下次使用
