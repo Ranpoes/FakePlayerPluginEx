@@ -25,7 +25,7 @@ public class FakePlayerAct {
                 String cmd2 = "fakeplayer toggle ";
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),cmd+name);
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),cmd2+name);
-                fakePlayerRefresh.removePlayer(fakePlayerRefresh.spawn());
+                fakePlayerRefresh.refresh();
                 cancel();
             }
         }.runTaskTimer(plugin, 0L, 20L);
@@ -37,7 +37,7 @@ public class FakePlayerAct {
             public void run(){
                 String cmd = "fakeplayer remove ";
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),cmd+name);
-                fakePlayerRefresh.removePlayer(fakePlayerRefresh.spawn());
+                fakePlayerRefresh.refresh();
                 cancel();
             }
         }.runTaskTimer(plugin, 0L, 20L);

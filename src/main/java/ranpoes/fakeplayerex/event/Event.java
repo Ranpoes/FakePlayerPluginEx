@@ -7,7 +7,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import ranpoes.fakeplayerex.FakePlayerEx;
 import ranpoes.fakeplayerex.file.PlayerNameFile;
 
-import java.util.Queue;
 
 public class Event implements Listener {
 

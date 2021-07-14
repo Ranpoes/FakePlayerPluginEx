@@ -19,13 +19,15 @@ public class Chating extends Thread{
     private ChatDataFile chatDataFile;
     private final FakePlayerAct fakePlayerAct;
     private final Logger logger;
+    private final int MIN_TIME_MILLIS;
 
     /**
      * 引用传递的构造函数
      * 线程将会使用Clocking线程不断更新的玩家在线列表
      * 线程不安全：如果玩家聊天进行中，Clocking执行了该玩家下线，则其发言将失败
      */
-    public Chating(FakePlayerEx plugin, Queue<String> playerNamesJoin, Logger logger){
+    public Chating(int MIN_TIME_MILLIS, FakePlayerEx plugin, Queue<String> playerNamesJoin, Logger logger){
+        this.MIN_TIME_MILLIS = MIN_TIME_MILLIS;
         this.plugin = plugin;
         this.logger = logger;
         this.playerNamesJoin = playerNamesJoin;
@@ -98,6 +100,7 @@ public class Chating extends Thread{
 
     public void run(){
         fakePlayerAct.fakePlayerReload();
+        int SEC_TIME_MILLIS = MIN_TIME_MILLIS/60;
         while(true){
             //大于1人时才能有对话
             try{
@@ -115,8 +118,7 @@ public class Chating extends Thread{
                     for(String[] i: context){
                         //模拟打字延迟
                         try{
-                            //Thread.sleep(i[1].length()*3000+(int) (Math.random()*(6)-3)*1000);
-                            Thread.sleep(100);
+                            Thread.sleep(i[1].length()*3*SEC_TIME_MILLIS+(int)(Math.random()*(6)-3)*SEC_TIME_MILLIS);
                         }catch( Exception e){
                             return;
                         }
@@ -135,8 +137,7 @@ public class Chating extends Thread{
             }
             //睡眠计时,时长为两个聊天会话的间隔，建议10min到15min
             try{
-                //Thread.sleep((int) (Math.random()*(5)+10)*60000);
-                Thread.sleep(1000);
+                Thread.sleep((int) (Math.random()*(5)+10)*MIN_TIME_MILLIS);
             }catch( Exception e){
                 return;
             }

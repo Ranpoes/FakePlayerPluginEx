@@ -26,7 +26,8 @@ public class Clocking extends Thread{
     private final Queue<String> playerNamesLeave;
     private final Logger logger = Bukkit.getLogger();
     private int clock;
-    private static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
+    private final static int MIN_TIME_MILLIS = 600; // 调试用的1分钟的毫秒长度
+    private final static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
     //异步模拟玩家聊天线程,需能够在插件onDisable时维护
     private Chating threadChating;
 
@@ -51,7 +52,7 @@ public class Clocking extends Thread{
         this.playerNamesJoin = new LinkedList<>();
         this.playerNamesLeave = new PlayerNameFile(plugin).getPlayers();
         //启动异步模拟玩家聊天线程
-        this.threadChating = new Chating(plugin, playerNamesJoin, logger);
+        this.threadChating = new Chating(MIN_TIME_MILLIS, plugin, playerNamesJoin, logger);
         threadChating.start();
     }
 
@@ -76,15 +77,15 @@ public class Clocking extends Thread{
                 else
                     logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点半，期望的玩家数量: "+ChatColor.YELLOW+num);
                 //异步模拟玩家陆续登录、离线线程。与计划的人数差和现有在线离线名单交由其处理
-                JoinAndLeaving threadJoinLeaving = new JoinAndLeaving(plugin,playerJoinNums - num, playerNamesJoin, playerNamesLeave);
+                JoinAndLeaving threadJoinLeaving = new JoinAndLeaving(MIN_TIME_MILLIS, plugin,playerJoinNums - num, playerNamesJoin, playerNamesLeave);
                 threadJoinLeaving.start();
                 //异步线程会在本时刻结束之前完成玩家人数变动，所以可以直接更新当前时刻的假玩家人数
                 //即使真的没有完成，但也问题不大，此只导致与计划中的玩家人数产生细微差别
                 playerJoinNums = num;
                 //睡眠计时,时长为一刻度
                 try{
-                    //Thread.sleep(30*60000);
-                    Thread.sleep(30*600);
+                    Thread.sleep(30*MIN_TIME_MILLIS);
+                    //Thread.sleep(30*600);
                 }catch( Exception e){
                     return;
                 }
