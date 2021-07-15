@@ -16,14 +16,18 @@ public class ChatDataFile {
     private final Logger logger;
     private static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
     //整个插件运行的生命周期内都会被维护的，未被使用语料库，在插件运行结束后会写回文件
-    private ArrayList<String[]> chatsPlayerText = new ArrayList<>();
-    //回调时同步删除语料内容，保存起始结束下标
-    int context_start;
-    int context_end;
+    private ArrayList<ArrayList<String[]>> chatsPlayerText = new ArrayList<>();
+    //回调时同步删除语料内容，保存选段下标
+    int context_loc;
 
     public ChatDataFile(FakePlayerEx plugin, Logger logger){
         this.plugin = plugin;
         this.logger = logger;
+        ArrayList<String[]> chatsPlayerTextTmp = new ArrayList<>();
+        // 按指定模式在字符串查找
+        String pattern = "(.*) \\$ (.*)";
+        // 创建 Pattern 对象
+        Pattern r = Pattern.compile(pattern);
         try{
             String chatPath = plugin.getConfig().getString("chat_data_path");
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(chatPath)));
@@ -32,14 +36,16 @@ public class ChatDataFile {
             while((data = br.readLine())!=null){
                 chats.add(data);
             }
-            // 按指定模式在字符串查找
-            String pattern = "(.*) \\$ (.*)";
-            // 创建 Pattern 对象
-            Pattern r = Pattern.compile(pattern);
             for(String i : chats){
+                //语料数据集中，具有时间距离的两段交流以@分隔，以此体现对话逻辑性
+                if(i.contains("@")){
+                    chatsPlayerText.add(new ArrayList<>(chatsPlayerTextTmp));
+                    chatsPlayerTextTmp.clear();
+                    continue;
+                }
                 Matcher m = r.matcher(i);
                 if(m.find()){
-                    this.chatsPlayerText.add(new String[]{m.group(1), m.group(2)});
+                    chatsPlayerTextTmp.add(new String[]{m.group(1), m.group(2)});
                 }
             }
         }catch(Exception e){
@@ -52,9 +58,14 @@ public class ChatDataFile {
      * 读取聊天语料备份
      * 备份数据是不会被修改的文件！
      */
-    public ArrayList<String[]> readChatBack(FakePlayerEx plugin){
+    public ArrayList<ArrayList<String[]>> readChatBack(){
+        ArrayList<ArrayList<String[]>> chatsPlayerTextBack = new ArrayList<>();
+        ArrayList<String[]> chatsPlayerTextTmp = new ArrayList<>();
+        // 按指定模式在字符串查找
+        String pattern = "(.*) \\$ (.*)";
+        // 创建 Pattern 对象
+        Pattern r = Pattern.compile(pattern);
         try{
-            ArrayList<String[]> chatsPlayerTextBack = new ArrayList<>();
             String chatPath = plugin.getConfig().getString("chat_data_path_back");
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(chatPath)));
             String data;
@@ -62,14 +73,16 @@ public class ChatDataFile {
             while((data = br.readLine())!=null){
                 chats.add(data);
             }
-            // 按指定模式在字符串查找
-            String pattern = "(.*) \\$ (.*)";
-            // 创建 Pattern 对象
-            Pattern r = Pattern.compile(pattern);
             for(String i : chats){
+                //语料数据集中，具有时间距离的两段交流以@分隔，以此体现对话逻辑性
+                if(i.contains("@")){
+                    chatsPlayerTextBack.add(new ArrayList<>(chatsPlayerTextTmp));
+                    chatsPlayerTextTmp.clear();
+                    continue;
+                }
                 Matcher m = r.matcher(i);
                 if(m.find()){
-                    chatsPlayerTextBack.add(new String[]{m.group(1), m.group(2)});
+                    chatsPlayerTextTmp.add(new String[]{m.group(1), m.group(2)});
                 }
             }
             return chatsPlayerTextBack;
@@ -86,31 +99,23 @@ public class ChatDataFile {
      * 这样可以避免一轮启动周期内可能的复读现象
      * 删除使用过的语料需要回调，因为这里产生的文本不一定能够在聊天线程中匹配到id，而可能直接被弃用
      */
-    public ArrayList<String[]> findContext(int takeWideMin, int takeWideMax){
+    public ArrayList<String[]> findContext(){
         int chatLinesMax = chatsPlayerText.size();
-        int ran1 = (int) (Math.random()*(chatLinesMax));
-        int ran2 = (int) (Math.random()*(takeWideMax-takeWideMin)+takeWideMin);
-        ArrayList<String[]> list = new ArrayList<>();
+        context_loc = (int) (Math.random()*(chatLinesMax));
         //每次匹配文本都会更新起始终止下标，只有匹配成功时的回调synDelete才会用其进行语料删除
-        context_start = Math.max(0,ran1-ran2);
-        context_end = Math.min(chatLinesMax-1,ran1+ran2);
-        for (int i = context_start; i < context_end; i++) {
-            list.add(chatsPlayerText.get(i));
-        }
-        if(chatLinesMax<50){
-            chatsPlayerText = new ArrayList<>(readChatBack(plugin));
+        //语段容量过少时直接拿备份重置,触发阈值不能太小，因为剩下的可能都是被拒取的脏数据
+        if(chatLinesMax<5){
+            chatsPlayerText = new ArrayList<>(readChatBack());
             logger.log(Level.INFO, TITLE+ChatColor.GOLD+"一轮周期的语料内容已使用完毕，现已重置");
         }
-        return list;
+        return chatsPlayerText.get(context_loc);
     }
 
     /**
      * 同步删除语料
      */
     public void synDelete(){
-        for (int i = context_start; i < context_end; i++) {
-            chatsPlayerText.remove(context_start);
-        }
+        chatsPlayerText.remove(context_loc);
     }
 
     /**
@@ -121,16 +126,22 @@ public class ChatDataFile {
         String chatPath = plugin.getConfig().getString("chat_data_path");
         try{
             OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(chatPath),"GB2312");
-            for(String[] i : chatsPlayerText){
-                out.write(i[0]+" $ "+i[1]+"\n");
+            for(ArrayList<String[]> i : chatsPlayerText){
+                for(String[] j : i){
+                    out.write(j[0]+" $ "+j[1]+"\n");
+                }
+                //写回语段时间性分隔标识符！！！
+                out.write("@\n");
             }
-            logger.log(Level.INFO, TITLE+ChatColor.GOLD+"成功写回了未使用的语料");
+            //使用OutputStreamWriter要close，不然写不完整
+            out.close();
+            logger.log(Level.INFO, TITLE+ChatColor.GOLD+"成功写回了"+chatsPlayerText.size()+"段未使用的语料");
         }catch (Exception e){
             System.out.println(e);
         }
     }
 
-    public ArrayList<String[]> getChatsPlayerText(){
+    public ArrayList<ArrayList<String[]>> getChatsPlayerText(){
         return this.chatsPlayerText;
     }
 

@@ -56,7 +56,8 @@ public class Chating extends Thread{
                             break;
                         }
                     }
-                    continue;
+                    //如果在线玩家中都没有op，那直接匹配失败
+                    return null;
                 }
                 //再匹到op名字则跳过
                 if((fakeName = playerNamesJoin.poll()).equals(opName)){
@@ -106,10 +107,10 @@ public class Chating extends Thread{
             try{
                 if(playerNamesJoin.size()>1){
                     HashMap<String, String> IDS;
-                    ArrayList<String[]> context = chatDataFile.findContext(3,8);
+                    ArrayList<String[]> context = chatDataFile.findContext();
                     //重复获取语段到有效为止
                     while((IDS = matchID(context)) == null){
-                        context = chatDataFile.findContext(3,8);
+                        context = chatDataFile.findContext();
                     }
                     chatDataFile.synDelete();
                     logger.log(Level.INFO, ChatColor.GOLD+"成功获取了一段聊天，总长："+ChatColor.RED+context.size());

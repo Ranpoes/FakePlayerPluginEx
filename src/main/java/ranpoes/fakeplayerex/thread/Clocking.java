@@ -26,7 +26,7 @@ public class Clocking extends Thread{
     private final Queue<String> playerNamesLeave;
     private final Logger logger = Bukkit.getLogger();
     private int clock;
-    private final static int MIN_TIME_MILLIS = 600; // 调试用的1分钟的毫秒长度
+    private final static int MIN_TIME_MILLIS = 60000; // 调试用的1分钟的毫秒长度
     private final static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
     //异步模拟玩家聊天线程,需能够在插件onDisable时维护
     private Chating threadChating;
@@ -85,7 +85,6 @@ public class Clocking extends Thread{
                 //睡眠计时,时长为一刻度
                 try{
                     Thread.sleep(30*MIN_TIME_MILLIS);
-                    //Thread.sleep(30*600);
                 }catch( Exception e){
                     return;
                 }
