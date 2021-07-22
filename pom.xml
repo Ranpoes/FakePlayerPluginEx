@@ -4,9 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>testPlugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>ranpoes.fakeplayerex</groupId>
+    <artifactId>fakeplayerex-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -38,12 +39,30 @@
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>20.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fakeplayer</groupId>
+            <artifactId>1_12_R1</artifactId>
+            <version>2.0</version>
+        </dependency>
+
     </dependencies>
+
+    <modules>
+        <module>src/main/java/ranpoes/fakeplayerex/fakeplayer</module>
+    </modules>
 
 </project>

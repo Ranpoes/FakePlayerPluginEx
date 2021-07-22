@@ -1,9 +1,11 @@
 package ranpoes.fakeplayerex.thread;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import ranpoes.fakeplayerex.FakePlayerEx;
 import ranpoes.fakeplayerex.file.ChatDataFile;
-import ranpoes.fakeplayerex.function.FakePlayerAct;
+import ranpoes.fakeplayerex.utils.FakePlayerAct;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -16,7 +18,7 @@ public class Chating extends Thread{
 
     private final FakePlayerEx plugin;
     private final Queue<String> playerNamesJoin;
-    private ChatDataFile chatDataFile;
+    private final ChatDataFile chatDataFile;
     private final FakePlayerAct fakePlayerAct;
     private final Logger logger;
     private final int MIN_TIME_MILLIS;
@@ -98,14 +100,31 @@ public class Chating extends Thread{
         chatDataFile.writeBack(plugin);
     }
 
+    public boolean isInFakePlayerNames(String s){
+        for(String i : playerNamesJoin){
+            if (i.equals(s)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isRealPlayer(){
+        for(Player i : Bukkit.getOnlinePlayers()){
+            if(!isInFakePlayerNames(i.getName())){
+                return true;
+            }
+        }
+        logger.log(Level.INFO, ChatColor.GOLD+"当前没有真人玩家在线，舍弃了一次模拟聊天");
+        return false;
+    }
 
     public void run(){
-        fakePlayerAct.fakePlayerReload();
         int SEC_TIME_MILLIS = MIN_TIME_MILLIS/60;
         while(true){
-            //大于1人时才能有对话
+            //大于1人时才能有对话，有活人时才能产生对话
             try{
-                if(playerNamesJoin.size()>1){
+                if(playerNamesJoin.size()>1 && isRealPlayer()){
                     HashMap<String, String> IDS;
                     ArrayList<String[]> context = chatDataFile.findContext();
                     //重复获取语段到有效为止
@@ -119,13 +138,17 @@ public class Chating extends Thread{
                     for(String[] i: context){
                         //模拟打字延迟
                         try{
-                            Thread.sleep(i[1].length()*3*SEC_TIME_MILLIS+(int)(Math.random()*(6)-3)*SEC_TIME_MILLIS);
+                            //每个字打3秒，全时间有-3~3秒的浮动
+                            int time = i[1].length()*3*SEC_TIME_MILLIS+(int)(Math.random()*(6)-3)*SEC_TIME_MILLIS;
+                            //全时间不可以小于3秒
+                            time = Math.max(3*SEC_TIME_MILLIS, time);
+                            Thread.sleep(time);
                         }catch( Exception e){
                             return;
                         }
                         //线程不安全，IDS的map内存放的玩家可能已异步下线，判断再发言
                         if(playerNamesJoin.contains(IDS.get(i[0]))){
-                            fakePlayerAct.fakePlayerChat(IDS.get(i[0]),i[1]);
+                            fakePlayerAct.chatFakes(IDS.get(i[0]),i[1]);
                             logger.log(Level.INFO, IDS.get(i[0])+" : "+i[1]);
                         }else{
                             //直接掐掉会话，不然可能会出现独角戏的情况

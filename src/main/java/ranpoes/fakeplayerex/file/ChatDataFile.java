@@ -2,6 +2,7 @@ package ranpoes.fakeplayerex.file;
 
 import org.bukkit.ChatColor;
 import ranpoes.fakeplayerex.FakePlayerEx;
+import ranpoes.fakeplayerex.utils.TextHelper;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public class ChatDataFile {
 
     private final FakePlayerEx plugin;
     private final Logger logger;
-    private static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
+    private static String TITLE = TextHelper.LOG_TITLE;
     //整个插件运行的生命周期内都会被维护的，未被使用语料库，在插件运行结束后会写回文件
     private ArrayList<ArrayList<String[]>> chatsPlayerText = new ArrayList<>();
     //回调时同步删除语料内容，保存选段下标

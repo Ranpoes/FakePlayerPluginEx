@@ -1,7 +1,9 @@
 package ranpoes.fakeplayerex.thread;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import ranpoes.fakeplayerex.FakePlayerEx;
-import ranpoes.fakeplayerex.function.FakePlayerAct;
+import ranpoes.fakeplayerex.utils.FakePlayerAct;
 
 import java.util.Queue;
 import java.util.Random;
@@ -23,13 +25,13 @@ public class JoinAndLeaving extends Thread{
     /**
      * 引用方式初始化成员变量，因此这里异步更新的在线玩家情况会同步回Clocking线程
      */
-    public JoinAndLeaving(int MIN_TIME_MILLIS, FakePlayerEx plugin, int schedule, Queue<String> playerNamesJoin, Queue<String> playerNamesLeave){
+    public JoinAndLeaving(int MIN_TIME_MILLIS, FakePlayerEx plugin, int schedule, Queue<String> playerNamesJoin, Queue<String> playerNamesLeave, FakePlayerAct fakePlayerAct){
         this.MIN_TIME_MILLIS = MIN_TIME_MILLIS;
         this.plugin = plugin;
         this.schedule = schedule;
         this.playerNamesJoin = playerNamesJoin;
         this.playerNamesLeave = playerNamesLeave;
-        this.fakePlayerAct = new FakePlayerAct(plugin);
+        this.fakePlayerAct = fakePlayerAct;
     }
 
     /**
@@ -82,12 +84,12 @@ public class JoinAndLeaving extends Thread{
 
     public void playerJoin(String name) {
         playerNamesJoin.add(name);
-        fakePlayerAct.fakePlayerJoin(name);
+        fakePlayerAct.addFakes(name, new Location(Bukkit.getWorld("world"),0,0,0));
     }
 
     public void playerLeave(String name) {
         playerNamesLeave.add(name);
-        fakePlayerAct.fakePlayerLeave(name);
+        fakePlayerAct.removeFakes(name);
     }
 
 }

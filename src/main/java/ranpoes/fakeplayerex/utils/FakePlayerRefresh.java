@@ -1,4 +1,4 @@
-package ranpoes.fakeplayerex.function;
+package ranpoes.fakeplayerex.utils;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_12_R1.*;

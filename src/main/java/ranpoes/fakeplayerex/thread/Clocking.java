@@ -5,12 +5,10 @@ import org.bukkit.ChatColor;
 import ranpoes.fakeplayerex.file.PlanFile;
 import ranpoes.fakeplayerex.file.PlayerNameFile;
 import ranpoes.fakeplayerex.FakePlayerEx;
+import ranpoes.fakeplayerex.utils.FakePlayerAct;
+import ranpoes.fakeplayerex.utils.TextHelper;
 
-import java.io.File;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,22 +24,20 @@ public class Clocking extends Thread{
     private final Queue<String> playerNamesLeave;
     private final Logger logger = Bukkit.getLogger();
     private int clock;
-    private final static int MIN_TIME_MILLIS = 60000; // 调试用的1分钟的毫秒长度
-    private final static String TITLE = ChatColor.RED+"["+ChatColor.GOLD+"FakePlayerEx"+ChatColor.RED+"] ";
+    private final static int MIN_TIME_MILLIS = 600; // 调试用的1分钟的毫秒长度
+    private final static String TITLE = TextHelper.LOG_TITLE;
     //异步模拟玩家聊天线程,需能够在插件onDisable时维护
-    private Chating threadChating;
+    private final Chating threadChating;
+    //维护有所有在线的假玩家NPC实例
+    private final FakePlayerAct fakePlayerAct;
 
     public Clocking(FakePlayerEx plugin){
         //等待服务端启动完毕,删除fakeplayer的保存假玩家文件,初始化开始时间刻
         try{
-            File file = new File(plugin.getConfig().getString("fakes_path"));
-            if(file.exists()) {
-                file.delete();
-                logger.log(Level.INFO, TITLE+ChatColor.BLUE+"fakes.json删除成功");
-            }
             int h = new GregorianCalendar().get(Calendar.HOUR_OF_DAY);
             int m = new GregorianCalendar().get(Calendar.MINUTE);
-            this.clock = h * 2 + ( m>=30 ? 1 : 0);
+            //this.clock = h * 2 + ( m>=30 ? 1 : 0);
+            this.clock = 46;
             logger.log(Level.INFO, TITLE+ChatColor.BLUE+"启动的时间刻："+ChatColor.YELLOW+this.clock);
         }catch(Exception e){
             logger.log(Level.SEVERE, TITLE+ChatColor.RED+"FakePlayerEx主线程启动失败！");
@@ -51,6 +47,7 @@ public class Clocking extends Thread{
         this.timePlayerNums = new PlanFile(plugin, clock).getTimePlayerNums();
         this.playerNamesJoin = new LinkedList<>();
         this.playerNamesLeave = new PlayerNameFile(plugin).getPlayers();
+        this.fakePlayerAct = new FakePlayerAct(plugin);
         //启动异步模拟玩家聊天线程
         this.threadChating = new Chating(MIN_TIME_MILLIS, plugin, playerNamesJoin, logger);
         threadChating.start();
@@ -58,6 +55,13 @@ public class Clocking extends Thread{
 
     public void close(){
         this.threadChating.close();
+    }
+
+    public void logPlan(int num){
+        if(clock%2 == 0)
+            logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点，期望的玩家数量: "+ChatColor.YELLOW+num);
+        else
+            logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点半，期望的玩家数量: "+ChatColor.YELLOW+num);
     }
 
     public void run(){
@@ -71,13 +75,10 @@ public class Clocking extends Thread{
             //内循环为自启动插件时刻开始的24小时推演，半小时为一刻
             while(clock-clock_start!=48){
                 //获取期望的玩家数量
-                num = timePlayerNumsTmp.poll();
-                if(clock%2 == 0)
-                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点，期望的玩家数量: "+ChatColor.YELLOW+num);
-                else
-                    logger.log(Level.INFO, TITLE+ChatColor.BLUE+"规划时间："+ChatColor.YELLOW+(clock/2)%24+ChatColor.BLUE+" 点半，期望的玩家数量: "+ChatColor.YELLOW+num);
+                num = Optional.ofNullable(timePlayerNumsTmp.poll()).orElse(0);
+                logPlan(num);
                 //异步模拟玩家陆续登录、离线线程。与计划的人数差和现有在线离线名单交由其处理
-                JoinAndLeaving threadJoinLeaving = new JoinAndLeaving(MIN_TIME_MILLIS, plugin,playerJoinNums - num, playerNamesJoin, playerNamesLeave);
+                JoinAndLeaving threadJoinLeaving = new JoinAndLeaving(MIN_TIME_MILLIS, plugin,playerJoinNums - num, playerNamesJoin, playerNamesLeave, fakePlayerAct);
                 threadJoinLeaving.start();
                 //异步线程会在本时刻结束之前完成玩家人数变动，所以可以直接更新当前时刻的假玩家人数
                 //即使真的没有完成，但也问题不大，此只导致与计划中的玩家人数产生细微差别
