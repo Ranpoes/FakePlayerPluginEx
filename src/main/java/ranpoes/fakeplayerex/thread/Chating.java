@@ -144,6 +144,7 @@ public class Chating extends Thread{
                             time = Math.max(3*SEC_TIME_MILLIS, time);
                             Thread.sleep(time);
                         }catch( Exception e){
+                            e.printStackTrace();
                             return;
                         }
                         //线程不安全，IDS的map内存放的玩家可能已异步下线，判断再发言
@@ -157,13 +158,13 @@ public class Chating extends Thread{
                     }
                 }
             }catch(Exception e){
-                System.out.println(e);
+                e.printStackTrace();
             }
             //睡眠计时,时长为两个聊天会话的间隔，建议10min到15min
             try{
                 Thread.sleep((int) (Math.random()*(5)+10)*MIN_TIME_MILLIS);
             }catch( Exception e){
-                return;
+                e.printStackTrace();
             }
         }
     }

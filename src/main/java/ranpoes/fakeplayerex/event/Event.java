@@ -42,7 +42,7 @@ public class Event implements Listener {
                arr[0].equals("/tell")) {
                 //如果命令指向假玩家
                 for(String i : fakeplayers){
-                    if(i.contains(arr[1])){
+                    if(i.equals(arr[1])){
                         event.setCancelled(true);
                         event.getPlayer().sendMessage(ChatColor.RED+"目标玩家设置了勿扰模式");
                         break;
@@ -50,27 +50,24 @@ public class Event implements Listener {
                 }
             }
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
     /**
-     * 1.12 spigot的BUG导致使用Server.Entity类时会巨量刷怪，这里使用概率来取消其中一部分刷怪事件
+     * 1.12 spigot的BUG导致使用Server.Entity类时会巨量刷生物，这里使用概率来取消其中一部分生物生成事件
      */
     @EventHandler
     public void onWorldSpawn(CreatureSpawnEvent event) {
         try{
-            String[] mobs = new String[]{"ZOMBIE","SKELETON","SPIDER","WITCH","CREEPER","ENDERMAN"};
-            //只有主世界存在这个问题
-            if(event.getEntity().getWorld().getWorldType().getName().equals("DEFAULT")){
-                for(String mob : mobs){
-                    if(event.getEntityType().getName().equalsIgnoreCase(mob) && (new Random().nextFloat()) <= 0.95){
-                        event.setCancelled(true);
-                    }
+            //只针对自然生成
+            if(event.getSpawnReason().toString().equals("NATURAL")){
+                if(new Random().nextFloat() <= 0.90){
+                    event.setCancelled(true);
                 }
             }
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 

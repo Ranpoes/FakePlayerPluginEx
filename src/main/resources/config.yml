@@ -1,4 +1,9 @@
 # default config.yml
-names_path: D:\Minecraft\sev\dev\src\main\resources\NAMES.txt
-plan_path: D:\Minecraft\sev\dev\src\main\resources\PLAN.txt
-chat_data_path: D:\Minecraft\sev\dev\src\main\resources\CHAT_DATA.txt
+#存放玩家id
+names_path:
+#存放玩家人数规划
+plan_path:
+#存放未使用的聊天语料
+chat_data_path:
+#存放聊天语料完整备份，重置时使用
+chat_data_path_back:

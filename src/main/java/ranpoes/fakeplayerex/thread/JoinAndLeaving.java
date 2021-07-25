@@ -74,7 +74,7 @@ public class JoinAndLeaving extends Thread{
             }
 
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -84,12 +84,12 @@ public class JoinAndLeaving extends Thread{
 
     public void playerJoin(String name) {
         playerNamesJoin.add(name);
-        fakePlayerAct.addFakes(name, new Location(Bukkit.getWorld("world"),0,0,0));
+        fakePlayerAct.addFakes(name, new Location(Bukkit.getWorld("world"),0,0,0),false);
     }
 
     public void playerLeave(String name) {
         playerNamesLeave.add(name);
-        fakePlayerAct.removeFakes(name);
+        fakePlayerAct.removeFakes(name, false);
     }
 
 }

@@ -41,7 +41,7 @@ public class FakePlayerAct {
         ).register(this.plugin);
     }
 
-    public void addFakes(@NotNull final String name, @NotNull final Location location) {
+    public void addFakes(@NotNull final String name, @NotNull final Location location, boolean hideFlag) {
         final Fake fake = new FakeBasic(name, location);
         this.fakeplayers.put(name, fake);
         new BukkitRunnable() {
@@ -51,23 +51,27 @@ public class FakePlayerAct {
                 //默认隐身
                 fake.toggleVisible();
                 fakePlayerRefresh.refresh();
-                logger.log(Level.INFO, TITLE+ChatColor.GREEN+"加入玩家 "+name);
-                Bukkit.getOnlinePlayers().forEach(player ->
-                        player.sendMessage(textHelper.toServerJoinFormat(name)));
+                if(!hideFlag){
+                    logger.log(Level.INFO, TITLE+ChatColor.GREEN+"加入玩家 "+name);
+                    Bukkit.getOnlinePlayers().forEach(player ->
+                            player.sendMessage(textHelper.toServerJoinFormat(name)));
+                }
                 cancel();
             }
         }.runTaskTimer(plugin, 0L, 20L);
     }
 
-    public void removeFakes(@NotNull final String name) {
+    public void removeFakes(@NotNull final String name, boolean hideFlag) {
         final Fake fake = this.fakeplayers.remove(name);
         new BukkitRunnable() {
             @Override
             public void run(){
                 fake.deSpawn();
-                logger.log(Level.INFO, TITLE+ChatColor.RED+"下线玩家 "+name);
-                Bukkit.getOnlinePlayers().forEach(player ->
-                        player.sendMessage(textHelper.toServerLeaveFormat(name)));
+                if(!hideFlag){
+                    logger.log(Level.INFO, TITLE+ChatColor.RED+"下线玩家 "+name);
+                    Bukkit.getOnlinePlayers().forEach(player ->
+                            player.sendMessage(textHelper.toServerLeaveFormat(name)));
+                }
                 cancel();
             }
         }.runTaskTimer(plugin, 0L, 20L);

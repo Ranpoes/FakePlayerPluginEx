@@ -50,7 +50,7 @@ public class ChatDataFile {
                 }
             }
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
             return;
         }
     }
@@ -88,7 +88,7 @@ public class ChatDataFile {
             }
             return chatsPlayerTextBack;
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
             return null;
         }
     }
@@ -138,7 +138,7 @@ public class ChatDataFile {
             out.close();
             logger.log(Level.INFO, TITLE+ChatColor.GOLD+"成功写回了"+chatsPlayerText.size()+"段未使用的语料");
         }catch (Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 

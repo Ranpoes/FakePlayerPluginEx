@@ -2,6 +2,7 @@ package ranpoes.fakeplayerex.thread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import ranpoes.fakeplayerex.file.PlanFile;
 import ranpoes.fakeplayerex.file.PlayerNameFile;
 import ranpoes.fakeplayerex.FakePlayerEx;
@@ -24,7 +25,7 @@ public class Clocking extends Thread{
     private final Queue<String> playerNamesLeave;
     private final Logger logger = Bukkit.getLogger();
     private int clock;
-    private final static int MIN_TIME_MILLIS = 600; // 调试用的1分钟的毫秒长度
+    private final static int MIN_TIME_MILLIS = 60000; // 调试用的1分钟的毫秒长度
     private final static String TITLE = TextHelper.LOG_TITLE;
     //异步模拟玩家聊天线程,需能够在插件onDisable时维护
     private final Chating threadChating;
@@ -36,8 +37,7 @@ public class Clocking extends Thread{
         try{
             int h = new GregorianCalendar().get(Calendar.HOUR_OF_DAY);
             int m = new GregorianCalendar().get(Calendar.MINUTE);
-            //this.clock = h * 2 + ( m>=30 ? 1 : 0);
-            this.clock = 46;
+            this.clock = h * 2 + ( m>=30 ? 1 : 0);
             logger.log(Level.INFO, TITLE+ChatColor.BLUE+"启动的时间刻："+ChatColor.YELLOW+this.clock);
         }catch(Exception e){
             logger.log(Level.SEVERE, TITLE+ChatColor.RED+"FakePlayerEx主线程启动失败！");
@@ -51,6 +51,9 @@ public class Clocking extends Thread{
         //启动异步模拟玩家聊天线程
         this.threadChating = new Chating(MIN_TIME_MILLIS, plugin, playerNamesJoin, logger);
         threadChating.start();
+        //激活刷怪Bug，否则如果此时服务器没有假玩家，则刷怪率极低
+        fakePlayerAct.addFakes("AA", new Location(Bukkit.getWorld("world"),0,0,0), true);
+        fakePlayerAct.removeFakes("AA", true);
     }
 
     public void close(){

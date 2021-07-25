@@ -1,6 +1,5 @@
 package fakeplayer;
 
-import java.net.SocketAddress;
 import java.util.Arrays;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.Bukkit;
