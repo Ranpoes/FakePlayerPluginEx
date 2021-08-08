@@ -39,39 +39,45 @@ public class Chating extends Thread{
 
     /**
      * 语料库玩家ID与假玩家ID匹配
+     * 需要甄别Op的语料，其必须和普通玩家分开不然破绽极大
      */
     public HashMap<String, String> matchID(ArrayList<String[]> contextList){
-        String opName = "Op_tt";
+        String opName = "Op_AA";
         HashMap<String, String> map = new HashMap<>();
         //服务器在线假玩家的名字队列需打乱，否则一直是排头几人在聊天
         List<String> playerNamesJoinList = new ArrayList<>(this.playerNamesJoin);
         shuffle(playerNamesJoinList);
         Queue<String> playerNamesJoin = new LinkedList<>(playerNamesJoinList);
         String fakeName;
+        //遍历获取的短文本，分配角色
         for(String[] i : contextList){
             if(!map.containsKey(i[0])){
-                //上下文中出现op，直接绑定
-                if(i[0].equals(opName)){
-                    for(String j : playerNamesJoin.toArray(new String[0])){
-                        if(j.equals(opName)){
-                            map.put(i[0],opName);
-                            break;
-                        }
-                    }
-                    //如果在线玩家中都没有op，那直接匹配失败
-                    return null;
-                }
-                //再匹到op名字则跳过
-                if((fakeName = playerNamesJoin.poll()).equals(opName)){
-                    fakeName = playerNamesJoin.poll();
-                }
+                fakeName = playerNamesJoin.poll();
                 if(null == fakeName){
                     //语料库随机得语段的玩家数量大于当前服务器假玩家数量，匹配失败，重新选取语段
                     //以返回null表示匹配失败
                     return null;
-                }else{
-                    map.put(i[0],fakeName);
                 }
+                //上下文中如果出现op，直接绑定假玩家中的op角色
+                if(i[0].equals(opName)){
+                    boolean findFlag = false;
+                    for(String j : playerNamesJoin.toArray(new String[0])){
+                        if(j.equals(opName)){
+                            map.put(i[0],opName);
+                            playerNamesJoin.remove(opName);
+                            findFlag = true;
+                            break;
+                        }
+                    }
+                    if(findFlag) {
+                        continue;
+                    }
+                    else{
+                        //上下文中如果出现op，在线假玩家中都没有op，那直接匹配失败
+                        return null;
+                    }
+                }
+                map.put(i[0],fakeName);
             }
         }
         return map;

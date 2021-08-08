@@ -62,7 +62,7 @@ public class Event implements Listener {
         try{
             //只针对自然生成
             if(event.getSpawnReason().toString().equals("NATURAL")){
-                if(new Random().nextFloat() <= 0.90){
+                if(new Random().nextFloat() <= 0.95){
                     event.setCancelled(true);
                 }
             }
